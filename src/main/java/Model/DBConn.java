@@ -1,7 +1,6 @@
 package Model;
 
 import oracle.jdbc.pool.OracleDataSource;
-
 import javax.swing.*;
 import java.io.*;
 import java.sql.Connection;
@@ -29,13 +28,14 @@ public class DBConn implements Serializable {
             url = SQLdata.get("url");
             user = SQLdata.get("user");
             password = SQLdata.get("password");
-        } catch (FileNotFoundException e) { newUser();
+        } catch (FileNotFoundException e) {
+            newUser();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public DBConn (String user, String password) {
+    public DBConn(String user, String password) {
         this.url = Pass.encodeText("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=dssprd-oradb.netia.org)(PORT=1522))(CONNECT_DATA=(SERVER=dedicated)(SERVICE_NAME=DSSPRD)))");
         this.user = Pass.encodeText(user);
         this.password = Pass.encodeText(password);
@@ -47,7 +47,7 @@ public class DBConn implements Serializable {
 
     public static void saveToFile(HashMap<String, char[]> data) {
         try {
-            FileOutputStream fos = new FileOutputStream(System.getProperty("user.dir")+"\\data.jpg");
+            FileOutputStream fos = new FileOutputStream(System.getProperty("user.dir") + "\\data.jpg");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(data);
             oos.close();
@@ -96,7 +96,7 @@ public class DBConn implements Serializable {
             ResultSet rs = stm.executeQuery(query);
             return rs;
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e.getErrorCode() == 1017) newUser();
         }
         return null;
     }

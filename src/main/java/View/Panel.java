@@ -3,7 +3,6 @@ package View;
 import Model.Emails;
 import Model.FileConverter;
 import Model.Tasks;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,36 +35,36 @@ public class Panel extends JPanel {
         add(otwarto);
         add(addFileChooser(20, 50, 20, 20, otwarto));
 
-        wyslano = addJLabel(45, 80, 535, 20, "Maile Wysłano");
+        wyslano = addJLabel(45, 80, 535, 20, "Maile Wyslano");
         add(wyslano);
         add(addFileChooser(20, 80, 20, 20, wyslano));
 
-        kliknieto = addJLabel(45, 110, 535, 20, "Maile Kliknięto");
+        kliknieto = addJLabel(45, 110, 535, 20, "Maile Kliknieto");
         add(kliknieto);
         add(addFileChooser(20, 110, 20, 20, kliknieto));
 
-        kliknietoOferta = addJLabel(45, 140, 535, 20, "Maile Kliknięto - Oferta (opcjonalnie)");
+        kliknietoOferta = addJLabel(45, 140, 535, 20, "Maile Kliknieto - Oferta (opcjonalnie)");
         add(kliknietoOferta);
         add(addFileChooser(20, 140, 20, 20, kliknietoOferta));
 
-        kliknietoPos = addJLabel(45, 170, 535, 20, "Maile Kliknięto POS (opcjonalnie)");
+        kliknietoPos = addJLabel(45, 170, 535, 20, "Maile Kliknieto POS (opcjonalnie)");
         add(kliknietoPos);
         add(addFileChooser(20, 170, 20, 20, kliknietoPos));
 
-        add(addJLabel(20, 200, 200, 20, "cade_id rozdzielone przecinkami:"));
+        add(addJLabel(20, 200, 200, 30, "cade_id rozdzielone przecinkami:"));
         cade = new JTextField();
-        cade.setBounds(225, 200, 355, 20);
+        cade.setBounds(225, 200, 355, 30);
         add(cade);
 
-        add(addJLabel(20, 230, 200, 20, "task_crea_dt w formacie YYYY-MM-DD:"));
-        cade = new JTextField();
-        cade.setBounds(225, 230, 355, 20);
-        add(cade);
+        add(addJLabel(20, 230, 200, 30, "task_crea_dt w formacie YYYY-MM-DD:"));
+        creaDt = new JTextField();
+        creaDt.setBounds(225, 230, 355, 30);
+        add(creaDt);
 
         JButton magic = new JButton("Do the magic");
         magic.setBounds(20, 275, 560, 60);
         magic.setBackground(Color.PINK);
-        magic.addActionListener(new Parse());
+        magic.addActionListener(new Parse(this));
         add(magic);
 
         msg = new JTextArea();
@@ -87,6 +86,10 @@ public class Panel extends JPanel {
         jl.setBounds(x, y, width, height);
         jl.setFont(new Font("Calibri", Font.PLAIN, 12));
         return jl;
+    }
+
+    public void setMsg(String s) {
+        this.msg.setText(s);
     }
 
     @Override
@@ -114,35 +117,49 @@ public class Panel extends JPanel {
     }
 
     class Parse implements ActionListener {
+        Panel panel;
+
+        Parse(Panel panel) {
+            this.panel = panel;
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (all.getText().equals("Wybierz plik"))
-                msg.setText("Dodaj plik ze wszystkimi mailami załączonymi do Sales Manago pod danym TAGiem");
-            else if (otwarto.getText().equals("Wybierz plik"))
-                msg.setText("Dodaj plik z mailami, które otworzyły wiadomość");
-            else if (wyslano.getText().equals("Wybierz plik"))
-                msg.setText("Dodaj plik z mailami, do których została wysłana wiadomość");
-            else if (kliknieto.getText().equals("Wybierz plik"))
-                msg.setText("Dodaj plik z mailami, które cośtam poklikały");
-            else /*if (kliknietoOferta.getText().equals("Wybierz plik") && kliknietoPos.getText().equals("Wybierz plik")
-                    && !cade.getText().equals(null) && !creaDt.getText().equals(null))*/ {
 
+            if (all.getText().equals("Maile ALL TAG"))
+                msg.setText("Dodaj plik ze wszystkimi mailami załączonymi do Sales Manago pod danym TAGiem");
+            else if (otwarto.getText().equals("Maile Otwarto"))
+                msg.setText("Dodaj plik z mailami, które otworzyły wiadomość");
+            else if (wyslano.getText().equals("Maile Wyslano"))
+                msg.setText("Dodaj plik z mailami, do których została wysłana wiadomość");
+            else if (kliknieto.getText().equals("Maile Kliknieto"))
+                msg.setText("Dodaj plik z mailami, które cośtam poklikały");
+            else if (!cade.getText().isEmpty() && !creaDt.getText().isEmpty() &&
+                    !kliknietoOferta.getText().equals("Maile Kliknieto - Oferta (opcjonalnie)") &&
+                    !kliknietoPos.getText().equals("Maile Kliknieto POS (opcjonalnie)")) {
+                panel.setMsg("pobieram dane z SQL");
                 FileConverter fc = new FileConverter(new Emails(all.getText()),
                         new Emails(otwarto.getText()),
                         new Emails(wyslano.getText()),
                         new Emails(kliknieto.getText()),
-                        new Tasks(cade.getText(), creaDt.getText()));
-                fc.setPath(all.getText().substring(0, all.getText().lastIndexOf('\\')) + "\\CVMM_20210721_123300.txt");
+                        new Emails(kliknietoOferta.getText()),
+                        new Emails(kliknietoPos.getText()),
+                        new Tasks(cade.getText(), creaDt.getText(), panel), panel);
                 fc.prepareFiles();
                 fc.exportFile();
-             /*   FileConverter fc = new FileConverter(in);
-                msg.setText("coś się zepsuło po zaimportowaniu");
-                fc.read();
-                msg.setText("coś się zepsuło przy exporcie");
-                fc.write();
-                msg.setText("done! " + fc.getOutput());*/
+                panel.setMsg("done");
+            } else if (!cade.getText().isEmpty() && !creaDt.getText().isEmpty()) {
+                panel.setMsg("pobieram dane z SQL");
+                FileConverter fc = new FileConverter(new Emails(all.getText()),
+                        new Emails(otwarto.getText()),
+                        new Emails(wyslano.getText()),
+                        new Emails(kliknieto.getText()),
+                        new Tasks(cade.getText(), creaDt.getText(), panel), panel);
+                fc.prepareFiles();
+                fc.exportFile();
+                panel.setMsg("done");
             }
+
 
         }
     }

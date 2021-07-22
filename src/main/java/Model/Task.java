@@ -1,10 +1,14 @@
 package Model;
 
+import java.util.LinkedList;
+
 public class Task {
     String taskBusiId;
-    String email;
-    public Task (String taskBusiId, String email) {
-        this.email = email;
+    LinkedList<String> email;
+
+    public Task(String taskBusiId, String mail) {
+        this.email = new LinkedList<>();
+        email.add(mail);
         this.taskBusiId = taskBusiId;
     }
 
@@ -12,7 +16,11 @@ public class Task {
         return taskBusiId;
     }
 
-    public String getEmail() {
+    public LinkedList<String> getEmails() {
         return email;
+    }
+
+    public void addEmail(String s) {
+        email.add(s);
     }
 }

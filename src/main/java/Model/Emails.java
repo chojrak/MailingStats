@@ -31,7 +31,14 @@ public class Emails {
         }
     }
 
-    public  HashSet <String> getMails () {
+    public HashSet<String> getMails() {
         return mails;
     }
+
+    public String getPath() {
+        return path;
+    }
+
 }
+
+

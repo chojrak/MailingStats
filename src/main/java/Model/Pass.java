@@ -5,7 +5,7 @@ public abstract class Pass {
         char[] chars = new char[text.length()];
         for (int i = 0; i < text.length(); i++) {
             chars[i] = text.charAt(i);
-            chars[i] = (char) (chars[i]+5);
+            chars[i] = (char) (chars[i] + 5);
         }
         return chars;
     }
@@ -13,7 +13,7 @@ public abstract class Pass {
     public static String decodeText(char[] chars) {
         StringBuilder sb = new StringBuilder();
         for (char a : chars) {
-            a= (char) (a-5);
+            a = (char) (a - 5);
             sb.append(a);
         }
         return sb.toString();

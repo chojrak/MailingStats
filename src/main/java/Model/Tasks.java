@@ -1,16 +1,22 @@
 package Model;
 
+import View.Panel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.HashMap;
 
 public class Tasks {
-    LinkedList<Task> tasks;
+    HashMap<String, Task> tasks;
+    HashMap<String, Mail> emails;
     String cade, creaDt;
+    Panel panel;
 
-    public Tasks(String cade, String creaDt) {
+    public Tasks(String cade, String creaDt, Panel panel) {
         this.cade = cade;
         this.creaDt = creaDt;
+        tasks = new HashMap<String, Task>();
+        emails = new HashMap<String, Mail>();
+        this.panel = panel;
         importTasks();
     }
 
@@ -25,19 +31,38 @@ public class Tasks {
             sb.append(") and task.task_clos_dt is null \n");
             sb.append("and trunc(task.task_crea_dt, 'dd') = '");
             sb.append(creaDt);
-            sb.append("'\n");
+            sb.append("'\n and task.task_sour_att");
+            sb.append(i);
+            sb.append("_tx is not null \n");
             if (i < 5) sb.append("union ");
         }
-
-        ResultSet rs = DBConn.Execute(sb.toString());
         try {
-            while (rs.next()) tasks.add(new Task(rs.getString("task_busi_id"), rs.getString("task_emai_tx")));
+            ResultSet rs = DBConn.Execute(sb.toString());
+            while (rs.next()) {
+                if (tasks.containsKey(rs.getString("task_busi_id")))
+                    tasks.get(rs.getString("task_busi_id")).addEmail(rs.getString("task_emai_tx"));
+                else
+                    tasks.put(rs.getString("task_busi_id"), new Task(rs.getString("task_busi_id"), rs.getString("task_emai_tx")));
+
+                if (emails.containsKey(rs.getString("task_emai_tx")))
+                    emails.get(rs.getString("task_emai_tx")).addTaskBusiId(rs.getString("task_busi_id"));
+                else
+                    emails.put(rs.getString("task_emai_tx"), new Mail(rs.getString("task_emai_tx"), rs.getString("task_busi_id")));
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            panel.setMsg(e.getMessage());
+        } catch (NullPointerException e) {
+            panel.setMsg("Brak danych z SQL");
         }
+
     }
 
-    public LinkedList<Task> getTasks() {
+    public HashMap<String, Task> getTasks() {
         return tasks;
     }
+
+    public HashMap<String, Mail> getMails() {
+        return emails;
+    }
+
 }
